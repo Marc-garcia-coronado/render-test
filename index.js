@@ -18,6 +18,8 @@ const unknownEndPoint = (request, response) => {
 app.use(cors());
 // json-parser de express -> para que se pueda acceder a request.body
 app.use(express.json())
+// Middleware para cargar nuestro front-end
+app.use(express.static('dist'))
 // Nuestro Middleware que nos printa la informacion de las requests
 app.use(requestLogger)
 // Middleware para cuando la ruta sea inexistente
@@ -25,19 +27,19 @@ app.use(requestLogger)
 
 let notes = [
     {
-      id: 1,
-      content: "HTML is easy",
-      important: true
+        id: 1,
+        content: "HTML is easy",
+        important: true
     },
     {
-      id: 2,
-      content: "Browser can execute only JavaScript",
-      important: false
+        id: 2,
+        content: "Browser can execute only JavaScript",
+        important: false
     },
     {
-      id: 3,
-      content: "GET and POST are the most important methods of HTTP protocol",
-      important: true
+        id: 3,
+        content: "GET and POST are the most important methods of HTTP protocol",
+        important: true
     }
 ]
 
@@ -95,10 +97,26 @@ app.post('/api/notes', (request, response) => {
     response.json(note)
 })
 
+app.put('/api/notes/:id', (request, response) => {
+    // By default request.params.id is a String, we have to convert it to a Number to be able find the index correctly
+    const id = Number(request.params.id)
+
+    const noteIndex = notes.findIndex(n => n.id === id)
+
+    if (noteIndex !== -1) {
+        const note = notes[noteIndex]
+
+        notes[noteIndex].important = !note.important
+
+        response.json(notes[noteIndex])
+    } else {
+        response.status(404).json({ error: "Note not found" })
+    }
+})
+
 
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
-  
